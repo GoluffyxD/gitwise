@@ -3,6 +3,13 @@
 import * as vscode from 'vscode';
 import { HelloWorldPanel } from './helloworldPanel';
 import { SidebarProvider } from './SidebarProvider';
+import { getGitBlame, getGitStatus } from './git-commands';
+
+interface CodeSelectionInfo {
+    code_selected: string;
+    filePath: string;
+    lineNumber: number;
+}
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -42,13 +49,34 @@ export function activate(context: vscode.ExtensionContext) {
 				return;
 			}
 			const selection = activeTextEditor.document.getText(activeTextEditor.selection);
+			const filePath = activeTextEditor.document.uri.fsPath;
+			const lineNumber = activeTextEditor.selection.active.line + 1;
+			const lineSelectionsFrom = activeTextEditor.selection.start.line + 1;
+			const lineSelectionsTo = activeTextEditor.selection.end.line + 1;
+			const code_selection_info: CodeSelectionInfo = {
+				code_selected: selection,
+				filePath: filePath,
+				lineNumber: lineNumber
+			};
+			console.log(code_selection_info);
 			if(selection === "") {
 				vscode.window.showInformationMessage("No selection has been made");
 			} else {
+				// Send message to WebView
 				sidebarProvider._view?.webview.postMessage({
 					type: 'code-select',
-					value: selection
+					value: JSON.stringify(code_selection_info)
 				});
+
+				getGitBlame(filePath).then((output) => {
+					console.log(output);
+					sidebarProvider._view?.webview.postMessage({
+						type: 'code-explain',
+						value: JSON.stringify(output)
+					});
+				  }).catch((error) => {
+					console.error('Error:', error);
+				  });
 			}
 		})
 	);
