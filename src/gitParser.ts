@@ -24,7 +24,7 @@ export function getRemoteInfo(remoteUrl: string) {
 }
 
 export function blameInfoParse(line: string): BlameInfo | null {
-    const blameInfoRegex = /^(\w{8}|\^\w{7})\s+\(([^)]+)\)\s+(.+)$/;
+    const blameInfoRegex = /^(.+)\s+\(([^)]+)\)\s+(.+)$/;
     const match = line.match(blameInfoRegex);
     const authorRegex = /^(.*?)\s+(\d{10})\s+(-?\d+)\s+(\d+)$/;
     if (match) {
