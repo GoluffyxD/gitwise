@@ -60,12 +60,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     const styleVSCodeUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css")
     );
-    const prismCSSUri = webview.asWebviewUri(
-        vscode.Uri.joinPath(this._extensionUri, "media", "prism.css")
-      );
-    const prismJSUri = webview.asWebviewUri(
-        vscode.Uri.joinPath(this._extensionUri, "media", "prism.js")
-      );
     // Use a nonce to only allow a specific script to be run.
     const nonce = getNonce();
 
@@ -84,14 +78,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 				<link href="${styleResetUri}" rel="stylesheet">
 				<link href="${styleVSCodeUri}" rel="stylesheet">
         <link href="${styleMainUri}" rel="stylesheet">
-        <link href="${prismCSSUri}" rel="stylesheet">
         <script nonce="${nonce}">
         const tsvscode = acquireVsCodeApi();
         </script>
 			</head>
       <body>
 				<script nonce="${nonce}" src="${scriptUri}"></script>
-				<script nonce="${nonce}" src="${prismJSUri}"></script>
                 </body>
 			</html>`;
   }
