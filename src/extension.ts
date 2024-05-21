@@ -1,9 +1,15 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import * as dotenv from "dotenv";
+dotenv.config({ path: __dirname+'/apikey.env' });
 import { HelloWorldPanel } from './helloworldPanel';
 import { SidebarProvider } from './SidebarProvider';
-import { getGitBlame, getGitStatus } from './git-commands';
+import { getGitBlameMinimal, getGitShow } from './git-commands';
+import { getMostRecentCommitHash } from './blameParser';
+
+import { getGPTExplanation } from './openai';
+
 
 interface CodeSelectionInfo {
     code_selected: string;
@@ -16,7 +22,6 @@ interface CodeSelectionInfo {
 export function activate(context: vscode.ExtensionContext) {
 
 	const sidebarProvider = new SidebarProvider(context.extensionUri);
-
 	const item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
 	item.text = "$(github-action) Gitwise Explain";
 	item.command = "gitwise.explain";
@@ -42,7 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 	context.subscriptions.push(
-		vscode.commands.registerCommand("gitwise.explain", () => {
+		vscode.commands.registerCommand("gitwise.explain", async () => {
 			const {activeTextEditor} = vscode.window;
 			if (!activeTextEditor){
 				vscode.window.showInformationMessage("No active text editor");
@@ -58,7 +63,6 @@ export function activate(context: vscode.ExtensionContext) {
 				filePath: filePath,
 				lineNumber: lineNumber
 			};
-			console.log(code_selection_info);
 			if(selection === "") {
 				vscode.window.showInformationMessage("No selection has been made");
 			} else {
@@ -67,16 +71,31 @@ export function activate(context: vscode.ExtensionContext) {
 					type: 'code-select',
 					value: JSON.stringify(code_selection_info)
 				});
-
-				getGitBlame(filePath).then((output) => {
+				
+				getGitBlameMinimal(filePath, lineSelectionsFrom, lineSelectionsTo).then((output) => {
 					console.log(output);
-					sidebarProvider._view?.webview.postMessage({
-						type: 'code-explain',
-						value: JSON.stringify(output)
+					const mostRecentCommit = getMostRecentCommitHash(output)?? "";
+					console.log(mostRecentCommit);
+					getGitShow(mostRecentCommit, filePath).then(async (gitDiffOutput) => {
+						console.log(gitDiffOutput);
+						getGPTExplanation(mostRecentCommit, gitDiffOutput)
+							.then((explanation) => {
+								console.log("Explanation:", explanation);
+								sidebarProvider._view?.webview.postMessage({
+									type: 'code-explain',
+									value: JSON.stringify(explanation)
+								});
+							}).catch((err) => {
+								console.log("Error in Explanation: ", err);
+							});
+							
+					}).catch((error) => {
+						console.error('Error:', error);
 					});
 				  }).catch((error) => {
-					console.error('Error:', error);
+						console.error('Error:', error);
 				  });
+
 			}
 		})
 	);
