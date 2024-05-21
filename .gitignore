@@ -6,3 +6,5 @@ node_modules
 .DS_Store
 .vscode/settings.json
 media/.DS_Store
+apikey.env
+src/apikey.env

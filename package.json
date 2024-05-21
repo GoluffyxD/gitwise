@@ -61,6 +61,7 @@
     "test": "vscode-test"
   },
   "devDependencies": {
+    "@octokit/core": "^6.1.2",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.6",
@@ -74,6 +75,7 @@
     "@vscode/test-cli": "^0.0.9",
     "@vscode/test-electron": "^2.3.9",
     "concurrently": "^8.2.2",
+    "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
     "rollup": "^2.3.4",
     "rollup-plugin-svelte": "^6.0.0",
@@ -86,5 +88,8 @@
     "typescript": "^5.4.5",
     "webpack": "^5.91.0",
     "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "openai": "^4.47.1"
   }
 }

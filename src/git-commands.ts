@@ -1,9 +1,5 @@
-
-// import { extensions } from "vscode";
-// import type { GitExtension } from "./git";
-import { execFile, spawn } from "child_process";
 import { dirname } from "path";
-import { promisify } from 'util';
+import { execCommand } from "./executeCommand";
 
 export const getGitCommand = (): string => {
 	// const vscodeGit = extensions.getExtension<GitExtension>("vscode.git");
@@ -15,48 +11,23 @@ export const getGitCommand = (): string => {
 	return "git";
 };
 
-
-// Promisify the execFile function
-export const execFileAsync = promisify(execFile);
-
-export async function getGitStatus(): Promise<string> {
-  try {
-    // Run the git status command
-    const { stdout } = await execFileAsync('git', ['status']);
-    
-    // Return the stdout output
-    return stdout;
-  } catch (error) {
-    // Handle errors (e.g., if git is not installed or not a git repository)
-    throw new Error(`Error executing git status: ${error}`);
-  }
-}
-
 export function getGitBlame(filePath: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const gitStatus = spawn('git', ['blame', "-C", "--incremental", "--", filePath], {
-      cwd: dirname(filePath)
-    });
-
-    let output = '';
-
-    gitStatus.stdout.on('data', (data) => {
-      output += data.toString();
-    });
-
-    gitStatus.stderr.on('data', (data) => {
-      console.error(`stderr: ${data}`);
-      reject(data.toString());
-    });
-
-    gitStatus.on('close', (code) => {
-      if (code === 0) {
-        resolve(output);
-      } else {
-        reject(`Process exited with code ${code}`);
-      }
-    });
-  });
+  const command = getGitCommand();
+  const args = ['blame', "-C", "--incremental", "--", filePath];
+  const opts = {cwd: dirname(filePath)};
+  return execCommand(command, args, opts);
 }
 
+export function getGitShow(commitId: string, filePath: string): Promise<string> {
+  const command = getGitCommand();
+  const args = ["--no-pager", "show", commitId, "--", filePath];
+  const opts = {cwd: dirname(filePath)};
+  return execCommand(command, args, opts);
+}
 
+export function getGitBlameMinimal(filePath: string, startLine: number, endLine: number): Promise<string> {
+  const command = getGitCommand();
+  const args = ['--no-pager', 'blame', "-L", `${String(startLine)},${String(endLine)}`, "-t", "--", filePath];
+  const opts = {cwd: dirname(filePath)};
+  return execCommand(command, args, opts);
+}
