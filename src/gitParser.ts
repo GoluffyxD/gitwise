@@ -6,15 +6,32 @@ export interface BlameInfo {
     lineContent: string;
 }
 
+export interface RemoteInfo {
+    owner: string;
+    repo: string;
+}
+
+export function getRemoteInfo(remoteUrl: string) {
+    const fetchRemote = remoteUrl.split("\n")[0].split(" ")[0].split("\t")[1];
+    const urlSplit = fetchRemote.split("/");
+    const owner = urlSplit[3] ?? "";
+    const repo = urlSplit[4].split(".")[0];
+    const remoteInfo: RemoteInfo = {
+        owner: owner,
+        repo: repo
+    };
+    return remoteInfo;
+}
+
 export function blameInfoParse(line: string): BlameInfo | null {
-    const blameInfoRegex = /^(\w{8})\s+\(([^)]+)\)\s+(.+)$/;
+    const blameInfoRegex = /^(\w{8}|\^\w{7})\s+\(([^)]+)\)\s+(.+)$/;
     const match = line.match(blameInfoRegex);
     const authorRegex = /^(.*?)\s+(\d{10})\s+(-?\d+)\s+(\d+)$/;
     if (match) {
         const [,commitHash, info, lineContent] = match;
         const infoMatch = info.match(authorRegex);
         if (infoMatch) {
-            const [, author, timeStamp, timeZone, lineNumber] = infoMatch;
+            const [, author, timeStamp, _, lineNumber] = infoMatch;
             return {
                 commitHash,
                 author,

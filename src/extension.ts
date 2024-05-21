@@ -5,8 +5,8 @@ import * as dotenv from "dotenv";
 dotenv.config({ path: __dirname+'/apikey.env' });
 import { HelloWorldPanel } from './helloworldPanel';
 import { SidebarProvider } from './SidebarProvider';
-import { getGitBlameMinimal, getGitShow } from './git-commands';
-import { getMostRecentCommitHash } from './blameParser';
+import { getGitBlameMinimal, getGitRemote, getGitShow } from './git-commands';
+import { getMostRecentCommitHash, getRemoteInfo } from './gitParser';
 
 import { getGPTExplanation } from './openai';
 
@@ -73,22 +73,25 @@ export function activate(context: vscode.ExtensionContext) {
 				});
 				
 				getGitBlameMinimal(filePath, lineSelectionsFrom, lineSelectionsTo).then((output) => {
-					console.log(output);
+					console.log("Git Blame Output: ", output);
 					const mostRecentCommit = getMostRecentCommitHash(output)?? "";
-					console.log(mostRecentCommit);
+					console.log("Most Recent Commit: ", mostRecentCommit);
 					getGitShow(mostRecentCommit, filePath).then(async (gitDiffOutput) => {
-						console.log(gitDiffOutput);
-						getGPTExplanation(mostRecentCommit, gitDiffOutput)
-							.then((explanation) => {
-								console.log("Explanation:", explanation);
-								sidebarProvider._view?.webview.postMessage({
-									type: 'code-explain',
-									value: JSON.stringify(explanation)
+						console.log("Git Show Output", gitDiffOutput);
+						getGitRemote(filePath).then((remoteUrl) => {
+							console.log("Remote output", remoteUrl);
+							const {owner, repo} = getRemoteInfo(remoteUrl);
+							getGPTExplanation(mostRecentCommit, gitDiffOutput, owner, repo)
+								.then((explanation) => {
+									console.log("Explanation:", explanation);
+									sidebarProvider._view?.webview.postMessage({
+										type: 'code-explain',
+										value: JSON.stringify(explanation)
+									});
+								}).catch((err) => {
+									console.log("Error in Explanation: ", err);
 								});
-							}).catch((err) => {
-								console.log("Error in Explanation: ", err);
-							});
-							
+						});
 					}).catch((error) => {
 						console.error('Error:', error);
 					});

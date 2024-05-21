@@ -31,3 +31,10 @@ export function getGitBlameMinimal(filePath: string, startLine: number, endLine:
   const opts = {cwd: dirname(filePath)};
   return execCommand(command, args, opts);
 }
+
+export function getGitRemote(filePath: string): Promise<string> {
+  const command = getGitCommand();
+  const args = ['remote', '-v'];
+  const opts = {cwd: dirname(filePath)};
+  return execCommand(command, args, opts);
+}
