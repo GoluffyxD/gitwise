@@ -40,16 +40,19 @@ async function chat(prInfo: PullRequestInfo, gitDiff: string) {
   return response;
 }
 
-export async function getGPTExplanation(commitSHA: string, gitDiff: string) {
-  const owner = 'GoluffyxD';
-  const repo = 'gitwise-test-1';
+export async function getGPTExplanation(commitSHA: string, gitDiff: string, owner: string, repo: string) {
+  // const owner = 'GoluffyxD';
+  // const repo = 'gitwise-test-1';
+  console.log("Repo Information", `${owner}, ${repo}`);
   const result = await getPullRequestNumber(commitSHA);
   if (!result) {
     console.log("Pr Number or Issue ID is undefined");
     return "";
   }
+  console.log("PR ID:", result);
   const {pullRequestId, issueId} = result;
   const prInfo = await getPRinfo(owner, repo, pullRequestId);
   // need to be modified
+  console.log("PR INFO:", prInfo);
   return chat(prInfo, gitDiff);
 }

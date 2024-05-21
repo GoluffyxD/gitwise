@@ -16,9 +16,6 @@ export interface PullRequestInfo {
   pullRequestConversations: string;
 }
 
-const owner = 'GoluffyxD';
-const repo = 'gitwise-test-1';
-
 export async function getPullRequestNumber(commitId: string): Promise<PullRequestIdentifier | undefined> {
   let issueId: number;
   let prNumber: number;

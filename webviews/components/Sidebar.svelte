@@ -1,9 +1,8 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    // import Prism from 'prismjs';
+    import { Jellyfish } from 'svelte-loading-spinners';
     import Highlight from "svelte-highlight";
     import tokyo from "svelte-highlight/styles/tokyo-night-dark";
-    // import typescript from "svelte-highlight/languages/typescript";
     import python from "svelte-highlight/languages/python";
     import type { CodeSelectionInfo } from "../globals";
     let language = "py";
@@ -11,8 +10,8 @@
     let code_selection: CodeSelectionInfo;
     let code_explanation: string = "";
     let code = "";
+    let loading: boolean = false;
     onMount(()=> {
-        // Prism.highlightAll();
         // Handle messages sent from the extension to the webview
         window.addEventListener('message', event => {
             const message = event.data; // The json data that the extension sent
@@ -24,9 +23,12 @@
                     selectedCode = code_selection_info.code_selected;
                     code = selectedCode;
                     code_selection = code_selection_info;
+                    code_explanation = ""; // Reset the explanation once code is selected.
+                    loading = true;
                     break;
                 case 'code-explain':
                     // code_selection = message.info;
+                    loading = false;
                     code_explanation = message.value;
                     break;
             }
@@ -40,13 +42,15 @@
 
 <style>
 </style>
-  
+
 <h2>Selected Code</h2>
 <Highlight language={python} {code} />
-<!-- <div>
-    {code_selection == undefined ? "" : JSON.stringify(code_selection)}
-</div> -->
+
 <h2>Code Explanation</h2>
 <div>
     {code_explanation}
+    {#if loading}
+        <h3>Analyzing Git Information</h3>
+        <Jellyfish size="60" color="#2d4ceb" unit="px" duration="2s" />
+    {/if}
 </div>
