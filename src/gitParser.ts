@@ -26,26 +26,32 @@ export function getRemoteInfo(remoteUrl: string) {
 export function blameInfoParse(line: string): BlameInfo | null {
     const blameInfoRegex = /^(.+)\s+\(([^)]+)\)\s+(.+)$/;
     const match = line.match(blameInfoRegex);
+    var author = "";
+    var timeStamp = "0";
+    var lineNumber = "0";
+    var timeZone = "";
+    console.log(match);
     const authorRegex = /^(.*?)\s+(\d{10})\s+(-?\d+)\s+(\d+)$/;
     if (match) {
         const [,commitHash, info, lineContent] = match;
         const infoMatch = info.match(authorRegex);
         if (infoMatch) {
-            const [, author, timeStamp, _, lineNumber] = infoMatch;
-            return {
-                commitHash,
-                author,
-                timestamp: parseInt(timeStamp),
-                lineNumber: parseInt(lineNumber),
-                lineContent
-            }; 
+            [, author, timeStamp, timeZone, lineNumber] = infoMatch;
         }
+        return {
+            commitHash,
+            author,
+            timestamp: parseInt(timeStamp),
+            lineNumber: parseInt(lineNumber),
+            lineContent
+        };
     }
     return null;
 }
 
 export function getMostRecentCommitHash(blameInfo: string) {
     const blameInfos = parseBlame(blameInfo);
+    console.log("Recent commit: ", blameInfos);
     if (blameInfos.length === 0) {
         return null; // Return null if the list is empty
     }
@@ -68,6 +74,7 @@ export function parseBlame(blameInfo: string) {
     const blameInfos: BlameInfo[] = [];
     for (const line of lines) {
         const parsedLine = blameInfoParse(line);
+        console.log("Parsed line: ", parsedLine);
         if (parsedLine) {
             blameInfos.push(parsedLine);
         }

@@ -29,7 +29,8 @@
                 case 'code-explain':
                     // code_selection = message.info;
                     loading = false;
-                    code_explanation = message.value;
+                    code_explanation = String(message.value).slice(1,-1);
+                    code_explanation = code_explanation.replaceAll("\\n", "<br />");
                     break;
             }
         });
@@ -41,6 +42,9 @@
 </svelte:head>
 
 <style>
+    .ce {
+        white-space: pre-line;
+    }
 </style>
 
 <h2>Selected Code</h2>
@@ -48,7 +52,9 @@
 
 <h2>Code Explanation</h2>
 <div>
-    {code_explanation}
+    <div class="ce">
+        { @html code_explanation}
+    </div>
     {#if loading}
         <h3>Analyzing Git Information</h3>
         <Jellyfish size="60" color="#2d4ceb" unit="px" duration="2s" />

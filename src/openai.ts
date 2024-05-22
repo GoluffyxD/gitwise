@@ -25,7 +25,7 @@ async function getGptResponse(prompt: string): Promise<string> {
   return response;
 }
 
-async function chat(prInfo: PullRequestInfo, gitDiff: string) {
+async function chat(prInfo: PullRequestInfo, gitDiff: string, selectedCode: string = "") {
   const prompt = `
   Given the following pull request (PR) information including the PR title, PR body, PR conversations, and the git diff, please provide a short summary explaining the code change. Make sure you mention the PR title, PR body, and summarise the PR conversations (also mentioning who were involved in the conversation) in your response.PR stands for Pull Request.
 
@@ -36,11 +36,24 @@ async function chat(prInfo: PullRequestInfo, gitDiff: string) {
 
   Summary:
   `;
-  const response = await getGptResponse(prompt);
+  const prompt2 = `
+  Given the following code and pull request (PR) information including the PR title, PR body, PR conversations, and the git diff, please provide a short summary explaining the code change.
+  Split the output into 4 sections. In the first section, explain the code provided in 2 or 3 lines. Briefly explain the git diff explaining the code change in the second section.
+  Summarize the PR Title and Body in the third section and the PR Conversations in the 4th sectino. Split each section with a \n character.
+  Make sure you mention the PR title, PR body, and summarise the PR conversations (also mentioning who were involved in the conversation) in your response.PR stands for Pull Request.
+  Code: ${selectedCode}
+  PR Title: ${prInfo.pullRequestTitle}
+  PR Body: ${prInfo.pullRequestBody}
+  PR Conversations: ${prInfo.pullRequestConversations}
+  Git Diff: ${gitDiff}
+
+  Summary:
+  `;
+  const response = await getGptResponse(prompt2);
   return response;
 }
 
-export async function getGPTExplanation(commitSHA: string, gitDiff: string, owner: string, repo: string) {
+export async function getGPTExplanation(commitSHA: string, gitDiff: string, owner: string, repo: string, selectedCode: string="") {
   // const owner = 'GoluffyxD';
   // const repo = 'gitwise-test-1';
   console.log("Repo Information", `${owner}, ${repo}`);
@@ -54,5 +67,5 @@ export async function getGPTExplanation(commitSHA: string, gitDiff: string, owne
   const prInfo = await getPRinfo(owner, repo, pullRequestId);
   // need to be modified
   console.log("PR INFO:", prInfo);
-  return chat(prInfo, gitDiff);
+  return chat(prInfo, gitDiff, selectedCode);
 }
