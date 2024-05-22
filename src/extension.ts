@@ -81,7 +81,7 @@ export function activate(context: vscode.ExtensionContext) {
 						getGitRemote(filePath).then((remoteUrl) => {
 							console.log("Remote output", remoteUrl);
 							const {owner, repo} = getRemoteInfo(remoteUrl);
-							getGPTExplanation(mostRecentCommit, gitDiffOutput, owner, repo)
+							getGPTExplanation(mostRecentCommit, gitDiffOutput, owner, repo, selection)
 								.then((explanation) => {
 									console.log("Explanation:", explanation);
 									sidebarProvider._view?.webview.postMessage({
