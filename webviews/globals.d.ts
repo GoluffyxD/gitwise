@@ -11,3 +11,8 @@ export interface CodeSelectionInfo {
     filePath: string;
     lineNumber: number;
 }
+
+export interface OutputMessage {
+    explanation: string;
+    pullRequestUrl: string;
+}
