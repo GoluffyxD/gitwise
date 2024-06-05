@@ -5,7 +5,6 @@ const octokit = new Octokit({
 });
 
 export interface PullRequestIdentifier {
-  issueId: number;
   pullRequestId: number;
 }
 
@@ -17,11 +16,10 @@ export interface PullRequestInfo {
   pullRequestUrl: string;
 }
 
-export async function getPullRequestNumber(commitId: string): Promise<PullRequestIdentifier | undefined> {
+export async function getPullRequestNumber(commitId: string, repository_url: string): Promise<PullRequestIdentifier | undefined> {
   let issueId: number;
   let prNumber: number;
   let prIdentifier: PullRequestIdentifier = {
-    issueId: 0,
     pullRequestId: 0
   };
   try {
@@ -31,9 +29,10 @@ export async function getPullRequestNumber(commitId: string): Promise<PullReques
         'X-GitHub-Api-Version': '2022-11-28'
       }
     });
-    issueId = response.data.items[0].id;
-    prNumber = response.data.items[0].number;
-    prIdentifier.issueId = issueId;
+    const relevantPrs = response.data.items.filter(x => x.repository_url === repository_url);
+    const changePr = relevantPrs.filter(x => x.pull_request?.merged_at !== null);
+
+    prNumber = changePr[0].number;
     prIdentifier.pullRequestId = prNumber;
     return prIdentifier;
   } catch (error) {
