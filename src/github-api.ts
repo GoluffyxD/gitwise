@@ -29,9 +29,10 @@ export async function getPullRequestNumber(commitId: string, repository_url: str
         'X-GitHub-Api-Version': '2022-11-28'
       }
     });
+    console.log("PRS:", response);
     const relevantPrs = response.data.items.filter(x => x.repository_url === repository_url);
     const changePr = relevantPrs.filter(x => x.pull_request?.merged_at !== null);
-
+    console.log("Relevant change prs: ", changePr);
     prNumber = changePr[0].number;
     prIdentifier.pullRequestId = prNumber;
     return prIdentifier;

@@ -32,7 +32,11 @@
                     const code_explanation_info: OutputMessage = JSON.parse(message.value)
                     code_explanation = String(code_explanation_info.explanation);
                     // code_explanation = code_explanation.replaceAll("\\n", "<br />");
-                    code_explanation += `\nFor more information, please visit this <a href=${code_explanation_info.pullRequestUrl}>PR link</a>`;
+                    if(code_explanation_info.pullRequestUrl !== ""){
+                        code_explanation += `\n\nFor more information, please visit this <a href=${code_explanation_info.pullRequestUrl}>PR link</a>`;
+                    } else {
+                        code_explanation += "\n\nUnfortunately, I could not find the relevant PR Information for the selected code."
+                    }
                     break;
             }
         });
