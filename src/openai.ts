@@ -5,13 +5,18 @@ const openai = new OpenAI({
   apiKey: process.env['OPENAI_API_KEY'], // This is the default and can be omitted
 });
 
+export interface OutputMessage {
+  explanation: string;
+  pullRequestUrl: string;
+}
+
 async function getGptResponse(prompt: string): Promise<string> {
 
   var response = "";
   const stream = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',
     messages: [{ role: 'user', content: prompt }],
-    max_tokens: 150,
+    max_tokens: 400,
     temperature: 0.7,
     top_p: 1.0,
     n: 1,
@@ -50,7 +55,11 @@ async function chat(prInfo: PullRequestInfo, gitDiff: string, selectedCode: stri
   Summary:
   `;
   const response = await getGptResponse(prompt2);
-  return response;
+  const outputMessage: OutputMessage = {
+    explanation: response,
+    pullRequestUrl: prInfo.pullRequestUrl
+  };
+  return outputMessage;
 }
 
 export async function getGPTExplanation(commitSHA: string, gitDiff: string, owner: string, repo: string, selectedCode: string="") {

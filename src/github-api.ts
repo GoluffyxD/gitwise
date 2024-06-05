@@ -14,6 +14,7 @@ export interface PullRequestInfo {
   pullRequestTitle: string;
   pullRequestBody: string;
   pullRequestConversations: string;
+  pullRequestUrl: string;
 }
 
 export async function getPullRequestNumber(commitId: string): Promise<PullRequestIdentifier | undefined> {
@@ -50,10 +51,11 @@ export async function getPRinfo(owner: string, repo: string, prNumber: number): 
     pullRequestId: prNumber,
     pullRequestTitle: "",
     pullRequestBody: "",
-    pullRequestConversations: ""
+    pullRequestConversations: "",
+    pullRequestUrl: ""
   };
   try {
-    const response = await octokit.request('GET /repos/{owner}/{repo}/pulls/{prNumber}', {
+    const response = await octokit.request('GET /repos/{owner}/{repo}/issues/{prNumber}', {
       owner,
       repo,
       prNumber,
@@ -61,10 +63,12 @@ export async function getPRinfo(owner: string, repo: string, prNumber: number): 
         'X-GitHub-Api-Version': '2022-11-28'
       }
     });
+    console.log("Response:", response);
     prTitle = response.data['title'];
     prBody = response.data['body'];
     prInfo.pullRequestTitle = prTitle;
     prInfo.pullRequestBody = prBody;
+    prInfo.pullRequestUrl = response.data['html_url'];
   } catch (error) {
     console.error(`Error fetching commits for ${owner}/${repo}:`, error);
   }

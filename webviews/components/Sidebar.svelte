@@ -4,7 +4,7 @@
     import Highlight from "svelte-highlight";
     import tokyo from "svelte-highlight/styles/tokyo-night-dark";
     import python from "svelte-highlight/languages/python";
-    import type { CodeSelectionInfo } from "../globals";
+    import type { CodeSelectionInfo, OutputMessage } from "../globals";
     let language = "py";
     let selectedCode = "";
     let code_selection: CodeSelectionInfo;
@@ -29,8 +29,10 @@
                 case 'code-explain':
                     // code_selection = message.info;
                     loading = false;
-                    code_explanation = String(message.value).slice(1,-1);
-                    code_explanation = code_explanation.replaceAll("\\n", "<br />");
+                    const code_explanation_info: OutputMessage = JSON.parse(message.value)
+                    code_explanation = String(code_explanation_info.explanation);
+                    // code_explanation = code_explanation.replaceAll("\\n", "<br />");
+                    code_explanation += `\nFor more information, please visit this <a href=${code_explanation_info.pullRequestUrl}>PR link</a>`;
                     break;
             }
         });

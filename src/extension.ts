@@ -82,11 +82,11 @@ export function activate(context: vscode.ExtensionContext) {
 							console.log("Remote output", remoteUrl);
 							const {owner, repo} = getRemoteInfo(remoteUrl);
 							getGPTExplanation(mostRecentCommit, gitDiffOutput, owner, repo, selection)
-								.then((explanation) => {
-									console.log("Explanation:", explanation);
+								.then((outputMessage) => {
+									console.log("outputMessage:", outputMessage);
 									sidebarProvider._view?.webview.postMessage({
 										type: 'code-explain',
-										value: JSON.stringify(explanation)
+										value: JSON.stringify(outputMessage)
 									});
 								}).catch((err) => {
 									console.log("Error in Explanation: ", err);
